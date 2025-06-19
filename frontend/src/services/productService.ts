@@ -35,7 +35,6 @@ export const updateProduct = async (productData: Product): Promise<Product> => {
 };
 
 export const deleteProduct = async (productId: string): Promise<void> => {
-  // PERBAIKAN: Gunakan template literal JavaScript yang benar
   const response = await fetch(`${API_URL}/${productId}`, {
     method: 'DELETE',
   });

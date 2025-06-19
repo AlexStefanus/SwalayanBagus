@@ -7,29 +7,27 @@ const addOrderItems = async (req: Request, res: Response) => {
     const { userId, customerName, items, totalPrice, shippingAddress, paymentMethod } = req.body;
 
     if (!items || items.length === 0) {
-        res.status(400).json({ message: 'Tidak ada barang dalam pesanan' });
-        return;
+        return res.status(400).json({ message: 'Tidak ada barang dalam pesanan' });
     }
     
     if (!paymentMethod || !['QRIS', 'COD'].includes(paymentMethod)) {
-        res.status(400).json({ message: 'Metode pembayaran tidak valid.' });
-        return;
+        return res.status(400).json({ message: 'Metode pembayaran tidak valid.' });
     }
 
     try {
-       for (const item of items as CartItem[]) {
-            const product = await ProductModel.findById(item.id);
+        const productIds = items.map((item: CartItem) => item.id);
+        const productsInDb = await ProductModel.find({ '_id': { $in: productIds } });
 
+        const productMap = new Map(productsInDb.map(p => [p._id.toString(), p]));
+
+        for (const item of items as CartItem[]) {
+            const product = productMap.get(item.id);
             if (!product) {
                 return res.status(404).json({ message: `Produk dengan nama "${item.name}" tidak ditemukan.` });
             }
-
             if (product.stock < item.quantity) {
                 return res.status(400).json({ message: `Stok untuk produk "${product.name}" tidak mencukupi. Sisa stok: ${product.stock}` });
             }
-
-            product.stock -= item.quantity;
-            await product.save();
         }
 
         const orderItems = items.map((item: CartItem) => ({
@@ -51,6 +49,15 @@ const addOrderItems = async (req: Request, res: Response) => {
         });
 
         const createdOrder = await newOrder.save();
+
+        const stockUpdates = items.map((item: CartItem) => ({
+            updateOne: {
+                filter: { _id: item.id },
+                update: { $inc: { stock: -item.quantity } }
+            }
+        }));
+        await ProductModel.bulkWrite(stockUpdates);
+        
         res.status(201).json(createdOrder);
 
     } catch (error) {
