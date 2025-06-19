@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SwalayanBagus</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              light: '#FCA5A5',
+              DEFAULT: '#EF4444',
+              dark: '#DC2626',
+            },
+            neutral: {
+              50: '#F9FAFB',
+              100: '#F3F4F6',
+              300: '#D1D5DB',
+              500: '#6B7280',
+              700: '#374151',
+              800: '#1F2937',
+            },
+            'site-bg': '#FFFFFF',
+          }
+        }
+      }
+    }
+  </script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-site-bg text-neutral-700">
+  <div id="root"></div>
+  <script type="module" src="/src/index.tsx"></script>
+</body>
+</html>
